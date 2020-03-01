@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gph.dao.CountryPortMapper">
+    <resultMap id="BaseResultMap" type="com.gph.entity.CountryPort" >
+        <id column="port_id" property="portId" jdbcType="INTEGER" />
+        <result column="port_string" property="portString" jdbcType="VARCHAR" />
+        <result column="country_id" property="countryId" jdbcType="INTEGER" />
+        <result column="ip" property="ip" jdbcType="VARCHAR" />
+        <result column="version" property="version" jdbcType="INTEGER" />
+
+        <association property="country" javaType="com.gph.entity.Country">
+            <result property="countryId" column="country_id"/>
+            <result property="countryName" column="country_name"/>
+        </association>
+
+    </resultMap>
+
+    <resultMap id="row_count" type="java.lang.Integer">
+        <result column="rowCount" jdbcType="INTEGER" javaType="Integer" />
+    </resultMap>
+
+
+
+    <select id="selectAllPort" resultMap="BaseResultMap">
+        select * from country_port;
+    </select>
+
+    <select id="select_port_by_countryName" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select port_id,port_string,country_port.country_id,country.country_name,version
+        from country_port
+        inner join country
+        on country_port.country_id = country.country_id
+        where country.country_name =  #{countryName,jdbcType=VARCHAR}
+        and ip is NULL
+        order by port_id asc limit 1
+    </select>
+
+    <update id="SetIP" parameterType="com.gph.entity.CountryPort" >
+        update country_port set ip  = #{ip,jdbcType=VARCHAR},version = version + 1
+        where port_id = #{portId,jdbcType=INTEGER} and version = #{version,jdbcType=INTEGER}
+    </update>
+
+    <update id="ReleasePort" parameterType="com.gph.entity.CountryPort">
+        update country_port set ip = null
+        where port_string = #{portString,jdbcType=VARCHAR}
+    </update>
+
+
+    <select id="query" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select country_name,country_port.country_id,port_string,port_id,ip from country
+        LEFT JOIN country_port on country_port.country_id = country.country_id
+        where 1 = 1
+        <if test="countryName !=null">
+            and country_name = #{countryName,jdbcType=VARCHAR}
+        </if>
+
+        <if test="ip != null">
+            and ip = #{ip,jdbcType=VARCHAR}
+        </if>
+
+        limit #{skipRows,jdbcType=INTEGER},10;
+    </select>
+
+    <select id="queryNot_limit" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select * from country_port inner JOIN country
+        on country_port.country_id = country.country_id
+        where 1 = 1
+        <if test="countryName !=null">
+            and country_name = #{countryName,jdbcType=VARCHAR}
+        </if>
+        <if test="ip != null">
+            and ip = #{ip,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <update id="ChangeCountryInfo" parameterType="com.gph.entity.CountryPort">
+        update country_port set country_id = #{countryId,jdbcType=INTEGER} , port_string = #{portString,jdbcType=VARCHAR}
+        WHERE port_id = #{portId,jdbcType=INTEGER};
+    </update>
+
+
+    <select id="selectCountryIdByName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select country_id from country
+        where country_name = #{countryName,jdbcType=VARCHAR};
+    </select>
+
+</mapper>

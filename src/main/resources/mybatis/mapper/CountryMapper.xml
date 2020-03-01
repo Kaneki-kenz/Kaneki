@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.gph.dao.CountryMapper">
+    <resultMap id="BaseResultMap" type="com.gph.entity.Country" >
+        <id column="country_id" property="countryId" jdbcType="INTEGER" />
+        <result column="country_name" property="countryName" jdbcType="VARCHAR" />
+    </resultMap>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select * from country;
+    </select>
+
+</mapper>
+
+
